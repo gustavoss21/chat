@@ -20,7 +20,7 @@
 criar um crud -> php artisan make:controller PhotoController --resource
 
 cria o modelo?
-php artisan make:controller PhotoController --model=Photo --resource
+php artisan make:controller MessageController --model=Message --resource
 
 ## inseriondo:
 broadcasting
