@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\IndexMessage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -29,7 +30,13 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $index_message = Message::Create($request->all());
+
+        if(!$index_message->count() > 0){
+            return response('the message no was created',400);
+        }
+
+        return response('message created');
     }
 
     /**
@@ -37,7 +44,7 @@ class MessageController extends Controller
      */
     public function show(Message $message)
     {
-        //
+        return response($message);
     }
 
     /**

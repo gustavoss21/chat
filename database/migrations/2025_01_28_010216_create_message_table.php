@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->text('message');
-            $table->char('uploud_message',255);
-            $table->foreignId('index_message_id')->references('id')->on('index_messages');
+            $table->char('uploud_message',255)->nullable();
+            $table->foreignId('sender_user_id')->references('id')->on('users');
+            $table->foreignId('recipient_user_id')->references('id')->on('users');
         });
     }
 
@@ -26,7 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('messages',function (Blueprint $table) {
-            $table->dropForeign(['index_message_id']);
+            $table->dropForeign(['sender_user_id'],['recipient_user_id']);
         });
 
         Schema::dropIfExists('messages');
