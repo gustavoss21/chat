@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -60,4 +61,15 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function contacts(Request $request){
+        // $username = $request->user()->name;
+        $username = $request->input('name');
+
+        $user = User::where('name','<>',$username)->get();
+
+        return response($user);
+
+    }
+
 }

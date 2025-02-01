@@ -16,15 +16,22 @@
 <!-- * composer run dev -->
 
 ## proximos passos 
-- 
-criar um crud -> php artisan make:controller PhotoController --resource
+- adicionar o envio de message
+- adicionar evento no envio de mensagem
 
-cria o modelo?
-php artisan make:controller MessageController --model=Message --resource
+## teste
+- testar rotas com tipo de dado para metch diferente de id e slug
 
 ## inseriondo:
 broadcasting
 * servido  e cliente conectado, mais o cliente não esta escutando o evento
+
+## planejamento
+usuario da emprasa(unico comunicalvel, disponibilidade do usuario)
+
+usuario da chamada
+
+usuario da chamada2
   
 
 ## enpecificações

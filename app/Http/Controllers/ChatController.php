@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
-use App\Models\IndexMessage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class MessageController extends Controller
+class ChatController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -69,5 +68,19 @@ class MessageController extends Controller
     public function destroy(Message $message)
     {
         //
+    }
+
+    public function messages(Request $request){
+
+        $messages = Message::where('sender_user_id',$request->get('sender_user_id'))
+                ->where('recipient_user_id',$request->get('recipient_user_id'))
+                ->orWhere(function($query) use($request){
+                    $query->where('recipient_user_id',$request->get('sender_user_id'))
+                    ->where('sender_user_id',$request->get('recipient_user_id'));
+                })
+                ->get();
+        
+        return response()->json($messages);
+
     }
 }

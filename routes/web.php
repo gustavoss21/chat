@@ -3,16 +3,31 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use APP\Models\User;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+    return Inertia::render('Dashboard', [
+        'user' => Auth::user()
     ]);
-});
+})->middleware('auth');
+
+Route::get('/list-contact', function(){
+    return Inertia::render('listContact', [
+        'user' => Auth::user()
+    ]);
+})->middleware('auth');
+
+Route::get("/chat", function(Request $request){
+    $user_received = User::find($request->get('received'));
+    
+    return Inertia::render('chat', [
+        'user' => Auth::user(),
+        'user_received'=>$user_received
+    ]);
+})->middleware('auth');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
