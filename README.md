@@ -18,6 +18,7 @@
 ## proximos passos 
 - adicionar o envio de message
 - adicionar evento no envio de mensagem
+- adiconar validador de message no messageControler
 
 ## teste
 - testar rotas com tipo de dado para metch diferente de id e slug

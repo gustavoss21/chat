@@ -1,7 +1,6 @@
-<script>
+<script type="setup">
 import { computed, defineComponent } from 'vue'
 import { Head, Link } from '@inertiajs/vue3';
-
 
 export default {
     props:['user','user_received'],
@@ -73,6 +72,8 @@ export default {
         <div v-else class="user_received">
             {{ message_data.message }}
         </div>
-
     </div>
+
+    <Message :user="user" :user_received="user_received"/>
+    
 </template>
