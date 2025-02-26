@@ -1,7 +1,3 @@
-## inseriondo:
-broadcasting
-* servido  e cliente conectado, mais o cliente não esta escutando o evento
-  
 ## install
  - PHP 8.x
  - Composer >= 2.x
@@ -11,25 +7,43 @@ broadcasting
  ## Initial Configuration
  - no renomei .env.exemple para .env, defina seus parametros do banco de dados
  - execute => php artisan migrate
+ - execute => php artisan key:generate
 
 ## dependecias de execucao
 * php artisan reverb:start --host=127.0.0.1 --port=9000
-* php artisan queue:work
+* php artisan queue:work --queue=high,default
 * npm run dev
-* composer run dev
+<!-- * composer run dev -->
 
+## proximos passos 
+- adiconar validador de message no messageControler
+- api auth request message
+- verificar e padronizar retornos de metodos de controller
+- envio de midia(videos, musicas, doc,imagens)
+
+## atencao
+- quais quer mudança feita na rota para obter as conversas(chat::get), deve ficar atento na variavel user_id em boostrap.js
+
+## teste
+- testar rotas com tipo de dado para metch diferente de id e slug
+
+## inseriondo:
+broadcasting
+* servido  e cliente conectado, mais o cliente não esta escutando o evento
+
+## planejamento
+usuario da emprasa(unico comunicável, disponibilidade do usuario)
+
+usuario da chamada
+
+usuario da chamada2
+  
 
 ## enpecificações
 * drive de transmissao: reverb
 
 * duvivada:
    - Você também precisará configurar e executar um queue worker . Toda a transmissão de eventos é feita por meio de trabalhos enfileirados para que o tempo de resposta do seu aplicativo não seja seriamente afetado por eventos transmitidos.(tenho que transmitir por jobs?)
-
-## proximos passos 
-criar um crud -> php artisan make:controller PhotoController --resource
-
-cria o modelo?
-php artisan make:controller PhotoController --model=Photo --resource
 
 ## interessante
 sobre a tabela
