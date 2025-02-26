@@ -12,7 +12,8 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/users', [ProfileController::class,'contacts']);
 
-Route::apiResource('chat',ChatController::class)
-    ->only([
-        'index','store'
-    ]);;
+Route::controller(ChatController::class)->group(function () {
+    route::get('chat','index');
+    route::post('chat','store');
+    route::patch('chat','updateViews');
+});

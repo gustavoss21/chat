@@ -4,7 +4,7 @@ export function request(url,method='GET',body=null,heads={}){
         headers: heads,
     };
 
-    if(method === 'POST'){
+    if(['POST','PATCH','PUT'].indexOf(method) !== -1){
         if(!body) return console.error('o paramentro body, nao foi enviado!')
         myInit['body'] = body
     }

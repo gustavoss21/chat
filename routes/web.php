@@ -25,7 +25,8 @@ Route::get("/chat", function(Request $request){
     
     return Inertia::render('chat', [
         'user' => Auth::user(),
-        'user_received'=>$user_received
+        'user_received'=>$user_received,
+        'token'=>$request->session()->token()
     ]);
 })->middleware('auth');
 

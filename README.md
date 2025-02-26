@@ -11,14 +11,18 @@
 
 ## dependecias de execucao
 * php artisan reverb:start --host=127.0.0.1 --port=9000
-* php artisan queue:work
+* php artisan queue:work --queue=high,default
 * npm run dev
 <!-- * composer run dev -->
 
 ## proximos passos 
-- adicionar o envio de message
-- adicionar evento no envio de mensagem
 - adiconar validador de message no messageControler
+- api auth request message
+- verificar e padronizar retornos de metodos de controller
+- envio de midia(videos, musicas, doc,imagens)
+
+## atencao
+- quais quer mudança feita na rota para obter as conversas(chat::get), deve ficar atento na variavel user_id em boostrap.js
 
 ## teste
 - testar rotas com tipo de dado para metch diferente de id e slug
@@ -28,7 +32,7 @@ broadcasting
 * servido  e cliente conectado, mais o cliente não esta escutando o evento
 
 ## planejamento
-usuario da emprasa(unico comunicalvel, disponibilidade do usuario)
+usuario da emprasa(unico comunicável, disponibilidade do usuario)
 
 usuario da chamada
 

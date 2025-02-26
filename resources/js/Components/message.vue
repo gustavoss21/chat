@@ -4,40 +4,37 @@ import { request } from '../utils/request'
 </script>
 <script>
 export default { 
-    props:['user','user_received'],
+    props:['user','user_received','token'],
     data(){
-        return{
-        'messages':'padrao'
+        return {
+            message:''
         }
     },
-    methods:{
-        sendMessage(form){
-            let headers = {
-                'accept':'application/json'
-            }
-            let url_base = "http://127.0.0.1:8000/api/chat";
-            let url = url_base+'?sender_user_id='+this.user.id+'&recipient_user_id='+this.user_received.id
-            let formData = new FormData(form.target);
-            request(url,'POST',formData,headers)
-                .then((message)=>{
-                    this.messages = message
-                    console.log(message)
-                }
-                )
 
-        },
-    },
+    methods:{
+        emitForm($event){
+            this.$emit('new_message',$event,this.message);
+
+            this.message = ''
+
+        }
+
+
+    }
+
+
 }
 </script>
 
 <template>
     <div>
-        <form @submit.prevent="sendMessage" action="/" method="post">
-    <input name="message" type="text" value="" placeholder="escreva sua mensagem">
-    <input name="sender_user_id" type="hidden" :value="user.id">
-    <input name="recipient_user_id" type="hidden" :value="user_received.id">
-    <button type="submit">enviar</button>
-</form>
-{{ messages }}
+        <form @submit.prevent="emitForm" action="/" method="post">
+            <input type="hidden" name="_token" :value="token" autocomplete="off">
+            <input v-model="message" name="message" type="text" value="" placeholder="escreva sua mensagem">
+            <input name="sender_user_id" type="hidden" :value="user.id">
+            <input name="recipient_user_id" type="hidden" :value="user_received.id">
+            <input name="status" type="hidden" value="1">
+            <button type="submit">enviar</button>
+        </form>
     </div>
-</template>
+</template> 
