@@ -14,9 +14,11 @@ Route::get('/', function () {
     ]);
 })->middleware('auth');
 
-Route::get('/list-contact', function(){
+Route::get('/list-contact', function(Request $request){
     return Inertia::render('listContact', [
-        'user' => Auth::user()
+        'user' => Auth::user(),
+        'token'=>$request->session()->token()
+
     ]);
 })->middleware('auth');
 
@@ -34,10 +36,29 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get(
+        'contact-us',function(Request $request){
+            return Inertia::render('contactUs', [
+                'user' => Auth::user(),
+                'token'=>$request->session()->token()
+            ]);
+        }
+    );
 });
+
+Route::get(
+    'call-super-user',function(Request $request){
+        return Inertia::render('contactUsMain', [
+            'user' => Auth::user(),
+            'token'=>$request->session()->token()
+        ]);
+    }
+);//->middleware(\App\Http\Middleware\authSuper::class);
 
 require __DIR__.'/auth.php';

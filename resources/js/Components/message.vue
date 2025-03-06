@@ -4,7 +4,7 @@ import { request } from '../utils/request'
 </script>
 <script>
 export default { 
-    props:['user','user_received','token'],
+    props:['user','user_id_received','token'],
     data(){
         return {
             message:''
@@ -20,6 +20,9 @@ export default {
         }
 
 
+    },
+    mounted(){
+        console.log(this.user_id_received)
     }
 
 
@@ -32,7 +35,7 @@ export default {
             <input type="hidden" name="_token" :value="token" autocomplete="off">
             <input v-model="message" name="message" type="text" value="" placeholder="escreva sua mensagem">
             <input name="sender_user_id" type="hidden" :value="user.id">
-            <input name="recipient_user_id" type="hidden" :value="user_received.id">
+            <input name="recipient_user_id" type="hidden" :value="user_id_received">
             <input name="status" type="hidden" value="1">
             <button type="submit">enviar</button>
         </form>

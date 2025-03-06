@@ -20,6 +20,7 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
+    _token: document.querySelector('meta[name=csrf-token]').content
 });
 
 const submit = () => {
@@ -38,6 +39,13 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
+            <TextInput
+                    id="_token"
+                    type="hidden"
+                    class="mt-1"
+                    v-model="form.csrf"
+                    required
+                />
             <div>
                 <InputLabel for="email" value="Email" />
 

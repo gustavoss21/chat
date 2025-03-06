@@ -16,3 +16,18 @@ Broadcast::channel('message.viewed.user.{user_id}', function (User $user, int $u
     return $user->id === $user_id;
 });
 
+Broadcast::channel('user.conect.{user_id}', function (User $user, int $user_id) {
+    return $user->id === $user_id;
+});
+
+Broadcast::channel('main.user.conect', function (User $user) {
+    return (bool) $user->is_super_user === true;
+});
+
+Broadcast::channel('call.closed.{user_id}', function (User $user, int $user_id) {
+    return $user_id === $user->id;
+});
+
+Broadcast::channel('user.confirmation.{user_id}', function (User $user, int $user_id) {
+    return $user->is_super_user && $user_id === $user->id;
+});

@@ -2,10 +2,10 @@
 import { computed, defineComponent } from 'vue'
 import { Head, Link } from '@inertiajs/vue3';
 import { request } from '../utils/request'
-
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 export default {
-    props:['user'],
+    props:['user','token'],
     data() {
         return{
             teste:'enos',
@@ -34,6 +34,7 @@ export default {
 
 <template>
     <Head title="lista de contatos" />
+    <NavBar :user="user" :token="token"></NavBar>
     <h1>chegamos</h1>
     <a  v-for="user_data in users" :href="url+'?send='+user.id+'&received='+user_data.id"> 
         <div class="contact">

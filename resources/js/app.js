@@ -5,6 +5,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import Message from '@/Components/message.vue';
+import NavBar from '@/Components/NavBar.vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -21,6 +22,7 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .component('Message',Message)
+            .component('NavBar',NavBar)
             .mount(el)
 
     },

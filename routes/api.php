@@ -12,8 +12,14 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/users', [ProfileController::class,'contacts']);
 
-Route::controller(ChatController::class)->group(function () {
-    route::get('chat','index');
-    route::post('chat','store');
-    route::patch('chat','updateViews');
+Route::controller(ChatController::class)->middleware(App\Http\Middleware\CustomSanctumAuth::class)->group(function () {
+    Route::get('/chat','index');
+    Route::post('/chat','store');
+    Route::patch('/chat','updateViews');
+    Route::post('/active-call','activeCall');
+    Route::post('/user-conect','userConect');
+    Route::get('/active-main-call','activeMainCall');
+    Route::get('/call-users','callUsers');
+    Route::post('/drop-call','dropCall');
+
 });
