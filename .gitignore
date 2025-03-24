@@ -22,9 +22,4 @@ yarn-error.log
 /.vscode
 /.zed
 composer.lock
-<<<<<<< HEAD
 teste.php
-=======
-package-lock.json
-/lang
->>>>>>> transmition_server

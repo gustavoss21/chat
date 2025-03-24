@@ -20,61 +20,55 @@ export default {
         }
     },
     methods:{
-        activeCall(){
-            let headers = {
-                // 'accept':'application/json',
-                "Content-Type": "application/json"
-            };
-
-            let formdata = JSON.stringify(this.user);
-            // return;
-            console.log(formdata)
-
-            request('http://127.0.0.1:8000/api/active-call','POST',formdata,headers)
-                .then(response=>{console.log('user comum active call');console.log(response)});
-                
+        activeCall(user_id){
+            if(user_id === this.user.id)return;
+            
+            this.connection_established = true;
+            this.user_id_connected = user_id;
+            this.classMessage.user_received_id = user_id;
         },
-        
-        execRequest(){            
-            let headers = {
-                    'Accept':'application/json',
-                    'Content-Type':'application/json'
-                }
+        deactiveCall(){
+            this.connection_established = false;
+            this.user_id_connected = undefined;
+            this.classMessage.user_received_id = undefined;
 
-            let body = JSON.stringify({'user_id':this.user.id,'super_user_id':this.user_id_connected})
-            request('http://127.0.0.1:8000/api/user-conect','POST',body,headers)
-                .then(response=>{
-                    console.log('user comum confirmed');
-                    this.connection_established = true;
-                    console.log(this.user_id_connected)
-                })
         },
-        handleUserLeave() {
-            navigator.sendBeacon("http://127.0.0.1:8000/api/drop-call", JSON.stringify({
-                'user_id':this.user.id,
-                'super_user_id':this.user_id_connected,
-                'user_receive':this.user.id
-            }))
+
+        dropCall(user){
+            Echo.leave(`contact.us.${user.id}`);
+            this.deactiveCall()
         }
         
     },
-    // beforeUnmount,
-    // deactivated,
-    // unmounted,
 
     mounted(){
-        window.addEventListener("beforeunload", this.handleUserLeave);
-        console.log(this.user)
-        this.activeCall();
+        // this.connetContactMain();
 
-        Echo.private(`user.conect.${this.user.id}`)
-            .listen('AlertsArrivalMainUser', (e) => {
-                this.status = 'já estamos online, relate seu problema';
-                this.classMessage.user_received_id = e.user_main_active_id
-                this.user_id_connected = e.user_main_active_id
-                console.log('us.'+this.user_id_connected)
-                this.execRequest()
-            });
+        Echo.join(`contact.us.${this.user.id}`)
+        .here((users) => {
+            console.log('esta aqui')
+            console.log(users);
+            this.activeCall(users[0].id)
+        })
+        .joining((user) => {
+            console.log('se juntou')
+            console.log(user);
+            this.activeCall(user.id)
+            
+        })
+        
+        .leaving((user) => {
+            console.log('deijou')
+            console.log(user);
+            this.dropCall(user)
+        })
+        .error((error) => {
+            console.log('esta error')
+
+            console.error(error);
+        }) 
+
+        Echo.join('user.access.contact.us')
 
         //defined message
         Echo.private(`chat.${this.user.id}`)
@@ -82,23 +76,6 @@ export default {
                 this.classMessage.messages.push(e.message);
                 // this.message.updateMessageView([e.message])
             });
-
-        Echo.private(`call.closed.${this.user.id}`)
-            .listen('CallClosedEvent', (e) => {
-                console.log('o chamada foi encerrada')
-                this.connection_established = false;
-            });
-    },
-    beforeUnmount(){
-        window.removeEventListener("beforeunload", this.handleUserLeave);
-        // let body = JSON.stringify(
-        //     {
-        //         'user_id':this.user.id,
-        //         'super_user_id':this.user_id_connected,
-        //         'user_receive':this.user.id
-        //     })
-
-        // request('http://127.0.0.1:8000/api/drop-call',body,'POST')
     },
 }
 </script>
@@ -117,7 +94,7 @@ export default {
                     {{ message_data.message }}
                 </div>
             </div>
-            <Message @new_message="(event,msg)=>classMessage.addMessage(event,msg)" :user="user" :user_id_received="user_id_connected" :token="token"/>
+            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_id_received="user_id_connected" :token="token"/>
         </div>
     </template>
 </template>

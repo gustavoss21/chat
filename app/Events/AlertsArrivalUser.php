@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AlertArrivalUser implements ShouldBroadcast
+class AlertsArrivalUser implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -28,7 +28,7 @@ class AlertArrivalUser implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('main.user.conect'),
+            new PresenceChannel('user.access.contact.us'),
         ];
     }
 
@@ -39,6 +39,6 @@ class AlertArrivalUser implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return ['user_id' => $this->user_id];
+        return ['user_main_active_id' => $this->user_id];
     }
 }

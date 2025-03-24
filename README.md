@@ -21,6 +21,7 @@
 - verificar e padronizar retornos de metodos de controller
 - envio de midia(videos, musicas, doc,imagens)
 - UserContactChat os usuarios devem ser unicos
+- metodo para apagar as mensagens de chat main
 
 ## atencao
 - quais quer mudança feita na rota para obter as conversas(chat::get), deve ficar atento na variavel user_id em boostrap.js

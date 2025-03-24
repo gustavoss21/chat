@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use APP\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard', [
@@ -60,5 +61,7 @@ Route::get(
         ]);
     }
 );//->middleware(\App\Http\Middleware\authSuper::class);
+
+
 
 require __DIR__.'/auth.php';

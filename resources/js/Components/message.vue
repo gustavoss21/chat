@@ -13,10 +13,10 @@ export default {
 
     methods:{
         emitForm($event){
-            this.$emit('new_message',$event,this.message);
-
+            let data = [$event,this.message]
+            this.$emit('new_message',data);
+            console.log(this.message);
             this.message = ''
-
         }
 
 

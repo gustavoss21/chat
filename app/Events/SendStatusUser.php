@@ -9,15 +9,18 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-
-class AlertsArrivalMainUser implements ShouldBroadcast
+/**
+ * @param int $user_offline_id - user offline
+ * @param int $user_reveived_id - user received transmition
+ */
+class SendStatusUser implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public $user_id, public $super_user_id)
+    public function __construct(public $user_status_id, public $status)
     {}
 
     /**
@@ -28,7 +31,7 @@ class AlertsArrivalMainUser implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user.conect.'.$this->user_id),
+            new PresenceChannel('user.status.transmition'),
         ];
     }
 
@@ -39,6 +42,6 @@ class AlertsArrivalMainUser implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return ['user_main_active_id' => $this->super_user_id];
+        return ['user_status_id' => $this->user_status_id,'status'=>$this->status];
     }
 }

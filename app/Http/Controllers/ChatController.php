@@ -1,18 +1,18 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use App\Models\UserContactChat;
+use App\Models\User;
 use App\Models\Message;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+// use App\Events\AlertsArrivalMainUser;
+// use App\Events\AlertToContactus;
+use App\Events\AlertsArrivalUser;
+// use App\Events\CallClosedEvent;
+use App\Events\SendStatusUser;
 use App\Events\SendMessage;
 use App\Events\MessageViewed;
-use App\Models\UserContactChat;
-use App\Events\AlertsArrivalMainUser;
-use App\Events\AlertArrivalUser;
-use App\Events\UserConnectionConfirmation;
-use App\Events\CallClosedEvent;
-use App\Models\User;
+use Exception;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,15 +71,6 @@ class ChatController extends Controller
         return response()->json(['status'=>200,'message'=>'updated']);
     }
 
-    public function activeCall(Request $request){
-        $user_id = $request->get('id');
-        $user_call = UserContactChat::firstOrCreate(['user_id'=>$user_id]);    
-
-        AlertArrivalUser::dispatch($user_id);
-
-        return response()->json($user_call);
-    }
-
     public function activeMainCall(Request $request){
         $user = $request->only('user_id');
         $call_main = UserContactChat::where('user_id',$user['user_id'])->first();
@@ -88,30 +79,30 @@ class ChatController extends Controller
             return response()->json(['status'=>'error','message'=>'main user already logged in'],404);
         }
 
-        AlertsArrivalMainUser::dispatch($user['user_id'],Auth::id());
+        // AlertsArrivalMainUser::dispatch($user['user_id'],Auth::id());
         
         $call_main->user_main_id = Auth::id();
         $call = $call_main->update();
 
         return response()->json(['was_updated_'=>$call]);
     }
+
     public function callUsers(){
         $users_For_call = UserContactChat::whereNull('user_main_id')->get();
 
         return response()->json($users_For_call);
     }
 
-    public function userConect(Request $request){
+    public function userConnect(Request $request){
+        $user_id = $request->get('user_id');
         $user_auth = Auth::user();
-        // $user_id = $request->get('user_id');
-        $super_user_id = $request->get('super_user_id');
-
-        $call = UserContactChat::where('user_id',$user_auth->id)->delete();
+        
+        if(!($user_auth->id === $user_id))return new Exception('ERROR, usuário não respondente');
 
         //transmition
-        UserConnectionConfirmation::dispatch($user_auth->id,$super_user_id);
+        broadcast(new AlertsArrivalUser($user_auth->id))->toOthers();
 
-        return Response()->json(['status_call'=>'confirmed',$call]);
+        return Response()->json(['status_call'=>'confirmed']);
     }
 
     public function dropCall(Request $request){
@@ -127,8 +118,27 @@ class ChatController extends Controller
         $call = UserContactChat::where('user_id',$user_id)->remove();
 
         //transmition
-        CallClosedEvent::dispatch($user_auth->id,$user_receive);
+        // CallClosedEvent::dispatch($user_auth->id,$user_receive);
 
         return Response()->json(['status_call'=>'closed',$call]);
+    }
+
+    public function statusUser(Request $request){
+
+        $user_status_id = $request->get('user_id');
+        // $user_received_id = $request->get('user_received_id');
+        $status_user = $request->get('status_user') === 'online'? true:false;
+
+        if(!Auth::id() === $user_status_id){
+            return Response()->json(['status_call'=>'not closed'],401);
+        }
+
+        // User::where('id',$user_status_id)->update(['status_user'=>$status_user]);
+
+        //transmition
+        broadcast(new SendStatusUser($user_status_id,$status_user))->toOthers();
+        // SendStatusUser::dispatch($user_status_id,$status_user);
+
+        return Response()->json(1);
     }
 }

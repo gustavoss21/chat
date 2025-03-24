@@ -20,6 +20,7 @@ Route::controller(ChatController::class)->middleware(App\Http\Middleware\CustomS
     Route::post('/user-conect','userConect');
     Route::get('/active-main-call','activeMainCall');
     Route::get('/call-users','callUsers');
-    Route::post('/drop-call','dropCall');
-
+    Route::post('/user-connect','userConnect');
+    Route::post('/status-user',[ChatController::class,'statusUser']);
 });
+
