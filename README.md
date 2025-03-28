@@ -16,7 +16,7 @@
 <!-- * composer run dev -->
 
 ## proximos passos 
-- adicionar status ao temple
+- carregameto dinamico da pagina
 - adiconar validador de message no messageControler
 - api auth request message
 - verificar e padronizar retornos de metodos de controller

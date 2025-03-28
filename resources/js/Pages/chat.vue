@@ -3,7 +3,6 @@ import { computed, defineComponent, toRaw } from 'vue'
 import { Head, Link } from '@inertiajs/vue3';
 import { Message } from '../utils/Message';
 import { request } from '@/utils/request';
-import data  from '@/utils/date';
 import '../../css/chat.css';
 // import {Echo} from '../echo.js';
 
@@ -73,11 +72,11 @@ export default {
         //ouve quando a mensagem for enviado
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.messages.push(e.message);
+                this.classMessage.setMessage([e.message]);
                 this.classMessage.updateMessageView([e.message])
             })
 
-
+        //ouve quando a mensagem for visualuzada
         Echo.private(`message.viewed.user.${this.user.id}`)
         .listen('MessageViewed', (e) => { 
 
@@ -118,13 +117,6 @@ export default {
             console.error(error);
         }) 
     },
-    computed:{
-        messageData(oldeMessage){
-            console.log(oldeMessage)
-            console.log(this.message_date)
-            return this.message_date !== oldeMessage? this.message_date:false
-        }
-    },
     beforeMount(){
         this.classMessage.getmessages(this.user_received)
         .then(response=>{this.classMessage.callUpdateMessage(response);this.classMessage.setMessage(response)});
@@ -141,13 +133,22 @@ export default {
                 {{ message_data.created_at }}
             </div>
             <div v-if="user.id==message_data.sender_user_id" class="user_send message-item">
-                {{ message_data.message }}   ->  {{ message_data.status }}
-            <span class="time-user-current">{{ message_data.time }}</span>
+                {{ message_data.message }}
+            <div class="time-user-current">
+                <span>{{ message_data.time }}</span>
+                <span class="icon-message">
+                    <div :class="message_data.status_class+ ' icon-message-bar icon-message-bar-one'"></div>
+                    <div :class="message_data.status_class+ ' icon-message-bar icon-message-bar-two'"></div>
+                    <div v-if="message_data.status == 2" :class="message_data.status_class+ ' icon-message-bar icon-message-bar-tree'"></div>
+                </span>
+            </div>
 
             </div>
             <div v-else class="user_received message-item">
                 {{ message_data.message }}
-            <span class="time">{{ message_data.time }}</span>
+                <div class="time">
+                    <span>{{ message_data.time }}</span>
+                </div>
 
             </div>
 

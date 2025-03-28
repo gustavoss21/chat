@@ -1,16 +1,6 @@
-import {Message} from 'utils/Message'
-export default {
-    static t = 'teste';
-
-    name() {
-       if(tes.t){
-            console.log('simmmmmmmmmmm')
-            console.log(tes['ts'])
-       }else{
-        console.log('naoooooo')
-       };
-    }
+let x = [1,2,2,3,4]
+function tes(num,soi=num){
+    return soi
 }
-
-let x = new tes()
-x.name()
+x.splice(null,1,'um')
+console.log(tes(num))

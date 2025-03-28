@@ -12,8 +12,14 @@ export class Message{
         this.status_pending,
         this.status_success,
         this.status_viewed,
-        this.status_list
     ]
+
+    static status_class = {
+        [this.status_error]:'icon-error',
+        [this.status_pending]:'icon-pending',
+        [this.status_success]:'icon-success',
+        [this.status_viewed]:'icon-viewed',
+    }
 
     constructor(user_id,user_received_id){
         this.messages = [];
@@ -28,12 +34,27 @@ export class Message{
     }
 
     setMessage(messages){
-        messages.forEach((element,index)=>{
-            let date = element.created_at
-            element.created_at = this.dateFormat(date);
-            element['time'] = this.getTimeMessage(date)
+        messages.forEach((element)=>{
+            element = this.setMessageDate(element)
             this.messages.push(element)
         })
+    }
+
+    updateMessage(message,index){
+        message = this.setMessageDate(message)
+        this.messages.splice(index,1,message);
+    }
+    /**
+     * nao mexe no this
+     * @param {Object} message_data 
+     * @return message_data
+     */
+    setMessageDate(message_data){
+        let date = message_data.created_at
+        message_data.created_at = this.dateFormat(date);
+        message_data['time'] = this.getTimeMessage(date)
+        message_data['status_class'] = Message.status_class[message_data.status]
+        return message_data
     }
 
     getTimeMessage(message_date){
@@ -101,10 +122,13 @@ export class Message{
             sender_user_id:this.user_id,
             message:msg,
             status:this.status_pending,
+            created_at: new Date(Date.now())
 
         }
+        
+        this.setMessage([message])
 
-        this.messages.push(message);
+        // this.messages.push(message);
 
         this.sendMessage(form)
 
@@ -123,9 +147,11 @@ export class Message{
 
         request(url,'POST',formData,headers)
             .then((msg)=>{
-                this.messages[this.messages.length -1] = msg;
+                let index = this.messages.length -1
+                this.updateMessage(msg,index)
+                this.updateMessageStatusTemple(Message.status_success)
             }
-            ).catch((error)=>this.updateMessageStatusTemple(Message.status_error))
+            ).catch((error)=>this.updateMessageStatusTemple(Message.status_error,null,true))
     }
 
     /**
@@ -134,14 +160,11 @@ export class Message{
      * @param Number ?index
      */
      updateMessageStatusTemple(status=null, index=null){
-        let message = {};
         let index_current = index || this.messages.length - 1;
 
         if(Message.status_list.indexOf(status) === -1) throw new TypeError('status error');
-
-        message = this.messages[index_current]
         
-        message.status = status;
-
-    }
+        this.messages[index_current].status = status; 
+        this.messages[index_current]['status_class'] = Message.status_class[status]
+     }
 }
