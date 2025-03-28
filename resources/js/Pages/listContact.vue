@@ -21,7 +21,6 @@ export default {
          * @description options status list => ['offline','online']
          */
         statusUser(status='offline') {
-            console.log('chamado')
             let headers = {
                 'content-type': 'application/json',
             };
@@ -63,7 +62,7 @@ export default {
             let user_name = this.user['name'];
 
             let rest = request('http://127.0.0.1:8000/api/users/?name='+user_name)
-            .then(response=>{console.log(response);this.users = response});
+            .then(response=>this.users = response);
 
             return rest
         },
@@ -89,8 +88,6 @@ export default {
             user_online.forEach(user=>user.status_user = 1)
         })
         .joining((user) => {
-            console.log('se juntou')
-            console.log(user);
             this.statusUser('online')
             let user_online = this.users.find(user=>user.id == user.id)
             
@@ -100,8 +97,6 @@ export default {
             
         })
         .leaving((user) => {
-            console.log('deijou')
-            console.log(user);
 
             let user_online = this.users.find(user=>user.id == user.id)
             

@@ -7,20 +7,75 @@ export class Message{
     static status_success = 1;
     static status_viewed = 2;
 
+    static status_list = [
+        this.status_error,
+        this.status_pending,
+        this.status_success,
+        this.status_viewed,
+        this.status_list
+    ]
+
     constructor(user_id,user_received_id){
         this.messages = [];
         this.user_id = user_id;
         this.user_received_id = user_received_id;
+        this.messageDay = 0
 
     }
     async getmessages(){
-        let messages = await request('api/chat?sender_user_id='+this.user_id+'&recipient_user_id='+this.user_received_id)
-
-        return messages
+        let messages = request('api/chat?sender_user_id='+this.user_id+'&recipient_user_id='+this.user_received_id)
+        return messages;
     }
 
+    setMessage(messages){
+        messages.forEach((element,index)=>{
+            let date = element.created_at
+            element.created_at = this.dateFormat(date);
+            element['time'] = this.getTimeMessage(date)
+            this.messages.push(element)
+        })
+    }
+
+    getTimeMessage(message_date){
+        let options = {minute: "numeric",hour: "numeric"}
+
+        let date = new Date(message_date)
+        return date.toLocaleTimeString('pt-BR',options)
+    }
+
+    dateFormat(message_date){
+        let options = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            };
+
+        let date = new Date(message_date)
+        let nowDate =new Date(Date.now());
+        
+        if(
+                date.getFullYear() === nowDate.getFullYear() && date.getMonth() === nowDate.getMonth()
+        ){
+            
+            if(date.getDate() === this.messageDay)return false;
+
+            if((nowDate.getDate() - date.getDate()) < 7 ){
+                options = {weekday: "long"};
+            }
+        }
+
+
+
+        this.messageDay = date.getDate()
+
+        return date.toLocaleDateString("pt-BR",options)
+    }
+
+    /**
+     * updates the message view status
+     */
     callUpdateMessage(messages){
-        let messages_viewed = messages.filter(message=>(this.user_id === message.recipient_user_id && message.status !== this.status_viewed))
+        let messages_viewed = messages.filter(message=>(this.user_id === message.recipient_user_id && message.status !== Message.status_viewed))
         if(!messages_viewed.length)return;
 
         this.updateMessageView(messages_viewed)
@@ -70,7 +125,7 @@ export class Message{
             .then((msg)=>{
                 this.messages[this.messages.length -1] = msg;
             }
-            ).catch((error)=>this.updateMessageStatusTemple('error'))
+            ).catch((error)=>this.updateMessageStatusTemple(Message.status_error))
     }
 
     /**
@@ -80,17 +135,13 @@ export class Message{
      */
      updateMessageStatusTemple(status=null, index=null){
         let message = {};
-        
-        if(!Message[status]) throw new TypeError('status error');
+        let index_current = index || this.messages.length - 1;
 
-        if(!index){
-            message = this.messages[this.messages.length - 1]
-        }else{
-            message = this.messages[index];
-        }
-        
+        if(Message.status_list.indexOf(status) === -1) throw new TypeError('status error');
 
-        message.status = Message[status]
+        message = this.messages[index_current]
+        
+        message.status = status;
 
     }
 }

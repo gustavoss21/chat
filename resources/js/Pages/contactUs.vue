@@ -14,22 +14,22 @@ export default {
             status:'aguarde alguem conectar...',
             messages:[],
             connection_established:false,
-            user_id_connected : null,
-            classMessage : new Message(this.user.id,this.user_id_connected)
+            user_received : null,
+            classMessage : new Message(this.user.id,this.user_connected.id)
 
         }
     },
     methods:{
-        activeCall(user_id){
-            if(user_id === this.user.id)return;
+        activeCall(user){
+            if(user.id === this.user.id)return;
             
             this.connection_established = true;
-            this.user_id_connected = user_id;
-            this.classMessage.user_received_id = user_id;
+            this.user_connected = user;
+            this.classMessage.user_received_id = user.id;
         },
         deactiveCall(){
             this.connection_established = false;
-            this.user_id_connected = undefined;
+            this.user_connected = undefined;
             this.classMessage.user_received_id = undefined;
 
         },
@@ -46,20 +46,14 @@ export default {
 
         Echo.join(`contact.us.${this.user.id}`)
         .here((users) => {
-            console.log('esta aqui')
-            console.log(users);
-            this.activeCall(users[0].id)
+            this.activeCall(users[0])
         })
         .joining((user) => {
-            console.log('se juntou')
-            console.log(user);
-            this.activeCall(user.id)
+            this.activeCall(user)
             
         })
         
         .leaving((user) => {
-            console.log('deijou')
-            console.log(user);
             this.dropCall(user)
         })
         .error((error) => {
@@ -94,7 +88,7 @@ export default {
                     {{ message_data.message }}
                 </div>
             </div>
-            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_id_received="user_id_connected" :token="token"/>
+            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_received="user_received" :token="token"/>
         </div>
     </template>
 </template>

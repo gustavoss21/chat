@@ -1,0 +1,102 @@
+
+h1{
+    background-color: rgb(42, 207, 196);
+    padding: 5px;
+    text-align: center;
+    color: white;
+}
+
+#user_received{
+    padding: 5px 10px;
+    box-shadow: -1px 2px 16px 0px #44373736;
+    margin-bottom: 20px;
+}
+
+#status{
+    color: rgba(0, 0, 0, 0.523);
+}
+
+.icon-status{
+    display: inline-block;
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+#icon-status-offline{
+    background-color: red;
+    border-radius: 5px;
+}
+
+#icon-status-online{
+    background-color: green ;
+    border-radius: 5px;
+}
+
+
+/* message */
+#content-input-message{
+    position: fixed;
+    bottom: 5px;
+    display: flex;
+    width: 100%;
+
+}
+
+#input_message{
+    border-color: rgb(146, 197, 207);
+    flex:10
+}
+#button-form{
+    flex:2;
+    background-color: rgb(2, 130, 130);
+    color:white
+}
+
+/* chat */
+#content-message{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 100px;
+    margin: 0 3%;
+
+}
+.message-item{
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+
+.user_received{
+    background-color: rgb(231, 234, 231);
+    align-self: start;
+   
+}
+
+.user_send{
+    background-color:  rgb(42, 207, 196);
+    color: white;
+    align-self: end;
+}
+
+.date{
+    color: rgb(157, 156, 156);
+    text-align: center;
+}
+
+.time{
+    color: rgb(157, 156, 156);
+    font-size: 0.8em;
+    position: relative;
+    display: block;
+    text-align: end;
+}
+
+.time-user-current{
+    color: rgba(118, 115, 115, 0.897);
+    font-size: 0.8em;
+    position: relative;
+    display: block;
+    text-align: end;
+}

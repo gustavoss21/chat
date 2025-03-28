@@ -16,22 +16,19 @@
 <!-- * composer run dev -->
 
 ## proximos passos 
+- adicionar status ao temple
 - adiconar validador de message no messageControler
 - api auth request message
 - verificar e padronizar retornos de metodos de controller
 - envio de midia(videos, musicas, doc,imagens)
 - UserContactChat os usuarios devem ser unicos
 - metodo para apagar as mensagens de chat main
-
-## atencao
-- quais quer mudança feita na rota para obter as conversas(chat::get), deve ficar atento na variavel user_id em boostrap.js
+- adicionar o campo typo em mensagem
 
 ## teste
 - testar rotas com tipo de dado para metch diferente de id e slug
 
 ## inseriondo:
-broadcasting
-* servido  e cliente conectado, mais o cliente não esta escutando o evento
 
 ## planejamento
 usuario da emprasa(unico comunicável, disponibilidade do usuario)
@@ -50,3 +47,6 @@ usuario da chamada2
 ## interessante
 sobre a tabela
 php artisan db:table users
+
+git commit 
+- ajustes  no recebimento do evento de status do usuário

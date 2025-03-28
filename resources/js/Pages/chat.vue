@@ -3,8 +3,9 @@ import { computed, defineComponent, toRaw } from 'vue'
 import { Head, Link } from '@inertiajs/vue3';
 import { Message } from '../utils/Message';
 import { request } from '@/utils/request';
+import data  from '@/utils/date';
+import '../../css/chat.css';
 // import {Echo} from '../echo.js';
-
 
 export default {
     props:['user','user_received','new_message','token'],
@@ -17,10 +18,10 @@ export default {
                 'online':1,
                 'offline':0
             },
-
-            status_user:0
-
-
+            messages:undefined,
+            messageDay:undefined,
+            status_user:0,
+            message_date:''
         }
     },
     methods:{
@@ -30,7 +31,6 @@ export default {
             this.status_user = this.status[status]
         },
         statusUser(status='offline') {
-            console.log('chamado')
             let headers = {
                 'content-type': 'application/json',
             };
@@ -63,32 +63,19 @@ export default {
             let myInits = new Blob([JSON.stringify(body)],{type: 'application/json'})
             navigator.sendBeacon('http://127.0.0.1:8000/api/status-user',myInits);
         },
+
+        setAndReturnData(data){
+            this.message_date = data
+            return data;
+        }
     },
     mounted(){
-        console.log('userReceivid')
-        console.log(this.user_received)
-        // window.addEventListener("beforeunload", ()=>this.statusUser('online'));
-        
-        // this.statusUser('online')
-
-        this.classMessage.getmessages(this.user_received)
-            .then(response=>{this.classMessage.callUpdateMessage(response)});
-
-        // Echo.private(`chat.${this.user.id}`)
-        //     .listen('SendMessage', (e) => {
-        //         this.classMessage.messages.push(e.message);
-        //         this.classMessage.updateMessageView([e.message])
-        //     })
-        //     .here(users => {
-        //         console.log("Usuários online:", users);
-        //     })
-        //     .joining(user => {
-        //         console.log(user.name + " entrou no chat");
-        //     })
-        //     .leaving(user => {
-        //         console.log(user.name + " saiu do chat");
-        //         // Atualizar status do usuário no Vue
-        //     });
+        //ouve quando a mensagem for enviado
+        Echo.private(`chat.${this.user.id}`)
+            .listen('SendMessage', (e) => {
+                this.classMessage.messages.push(e.message);
+                this.classMessage.updateMessageView([e.message])
+            })
 
 
         Echo.private(`message.viewed.user.${this.user.id}`)
@@ -96,15 +83,14 @@ export default {
 
             this.classMessage.messages.forEach((element,index) => {
                 if(e.messages_id.indexOf(element.id) !== -1){
-                    this.classMessage.updateMessageStatusTemple('viewed',index)
+                    this.classMessage.updateMessageStatusTemple(Message.status_viewed,index)
                 }
             });
         });
 
         Echo.join('user.status.transmition')
         .here((users) => {
-            console.log('esta aqui')
-            console.log(users);
+
             let user_online = users.find(
                     search =>search.id == this.user_received.id
                 )
@@ -114,68 +100,57 @@ export default {
             this.setStatusUser('online')
         })
         .joining((user) => {
-            console.log('se juntou')
-            console.log(user);
             // this.statusUser('online')
-            let user_online = this.users.find(user=>user.id == user.id)
+            let user_online = user.id == this.user_received.id
             
             if(!user_online)return;
 
             this.setStatusUser('online')
             
         })
-        .leaving((user) => {
-            console.log('deijou')
-            console.log(user);
+        .leaving((user_leaving) => {
+            this.setStatusUser('offline')
 
-            let user_online = this.users.find(user=>user.id == user.id)
-            
-            if(!user_online)return;
-
-            user_online.status_user = 0
         })
         .error((error) => {
             console.log('esta error')
 
             console.error(error);
         }) 
-        // .listen('SendStatusUser', (e) => {
-        //     console.log('eventoenviado');
-        //     console.log(e);
-
-        //     let user_online = this.users.find(user=>user.id == e.user_status_id)
-            
-        //     if(!user_online)return;
-
-        //     user_online.status_user = 1
-            
-        // });
-
     },
-    beforeUnmount() {
-        // window.removeEventListener("beforeunload", this.statusUser);
-  },
     computed:{
-
+        messageData(oldeMessage){
+            console.log(oldeMessage)
+            console.log(this.message_date)
+            return this.message_date !== oldeMessage? this.message_date:false
+        }
+    },
+    beforeMount(){
+        this.classMessage.getmessages(this.user_received)
+        .then(response=>{this.classMessage.callUpdateMessage(response);this.classMessage.setMessage(response)});
     }
 }
 </script>
 
 <template>
-    <Head title="lista de contatos" />
-    <h1>chegamos no chat</h1>
-    <div id="user-received">
-        <h2>{{ user_received.name }}</h2>
-        <span>{{ status_user }}</span>
-    </div>
-    <div v-for="message_data in classMessage.messages"> 
+    <Head title="conversa" />
+    <Message @new_message="(data)=>classMessage.addMessage(...data)" title="conversar" :user="user" :user_received="user_received" :token="token" :status_user="status_user"/>
+    <div id="content-message">
+        <template v-for="message_data in classMessage.messages"> 
+            <div class="date" v-if="message_data.created_at">
+                {{ message_data.created_at }}
+            </div>
+            <div v-if="user.id==message_data.sender_user_id" class="user_send message-item">
+                {{ message_data.message }}   ->  {{ message_data.status }}
+            <span class="time-user-current">{{ message_data.time }}</span>
 
-        <div v-if="user.id==message_data.sender_user_id" class="user_send">
-            {{ message_data.message }}   ->  {{ message_data.status }}
-        </div>
-        <div v-else class="user_received">
-            {{ message_data.message }}
-        </div>
+            </div>
+            <div v-else class="user_received message-item">
+                {{ message_data.message }}
+            <span class="time">{{ message_data.time }}</span>
+
+            </div>
+
+        </template>
     </div>
-    <Message @new_message="(data)=>classMessage.addMessage(...data)" :user="user" :user_id_received="user_received.id" :token="token"/>
 </template>
