@@ -28,7 +28,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div id="message-elements">
         <h1>{{ title }}</h1>
         <div id="user_received">
             <h2>{{ user_received.name }}</h2>
