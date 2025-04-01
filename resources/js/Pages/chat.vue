@@ -1,157 +1,90 @@
 <script type="setup">
 import { computed, defineComponent, toRaw } from 'vue'
 import { Head, Link } from '@inertiajs/vue3';
-import { Message } from '../utils/Message';
 import { request } from '@/utils/request';
-import '../../css/chat.css';
-// import {Echo} from '../echo.js';
+import { Message } from '../utils/Message';
+import ListContact from './listContact.vue';
 
 export default {
-    props:['user','user_received','new_message','token'],
-    data() {
+    props:['user','token'],
+    data(){
         return{
-            url : "http://127.0.0.1:8000/chat",
-            classMessage: new Message(this.user.id,this.user_received.id),
-            host: location.host,
-            status:{
-                'online':1,
-                'offline':0
-            },
-            messages:undefined,
-            messageDay:undefined,
-            status_user:0,
-            message_date:''
+            users:[],
+            online_user : 1,
+            offline_user : 0,
+            componets:
+                {
+                    'listContact':{'name':'listContact','user':this.user,'token':this.token},
+                    'chatMessage':{'name':'chatMessage','user':this.user,'token':this.token,'user_received':null,'new_message':null},
+                    'contactUs':{'name':'contactUs','user':this.user,'token':this.token},
+                    'ContactUsMain':{'name':'ContactUsMain','user':this.user,'token':this.token}
+                },
+            componete_active:{},
+            classMessage: new Message(this.user.id),
+
         }
     },
     methods:{
-        setStatusUser(status){
-            if(!this.status.hasOwnProperty(status))return;
+        setComponent(component,data){
+            if(!Object.hasOwn(this.componets,component))return;
+        
+            this.componete_active = this.componets[component]
+            this.componete_active['classMessage'] = this.classMessage
 
-            this.status_user = this.status[status]
-        },
-        statusUser(status='offline') {
-            let headers = {
-                'content-type': 'application/json',
-            };
-            // heads.Origin = location.origin;
-            let body = 
-                {
-                    'user_id': this.user.id,
-                    'status_user':status,
-                    'tramission':false,
-                    'user_received_id':0,
-                    '_method':'POST',
-                    '_token':this.token
-                };
-
-            // request('http://127.0.0.1:8000/status-user','POST',body,headers)
-            //     .then(response=>console.log(response))
-            //     .catch(error=>console.error(error));
-            
-            
-            headers['X-CSRF-TOKEN'] = document.querySelector('meta[name=csrf-token]').content
-            headers.Accept = 'application/json';
-            headers.Origin = location.origin;
-
-            let myInit = {
-                body:body,
-                headers:headers
-
+            if(data){
+                Object.keys(data).forEach(key=>{
+                    if(Object.hasOwn(this.componete_active,key)){
+                        this.componete_active[key] = data[key];
+                    }
+                })
             }
 
-            let myInits = new Blob([JSON.stringify(body)],{type: 'application/json'})
-            navigator.sendBeacon('http://127.0.0.1:8000/api/status-user',myInits);
         },
+        getContacts(){
+            let user_name = this.user['name'];
 
-        setAndReturnData(data){
-            this.message_date = data
-            return data;
+            let users = request('http://127.0.0.1:8000/api/users/?name='+user_name)
+            .then(response=>{this.users = response,this.componete_active['users']= response});
+        },
+        setStatusUsers(users,status){
+            users.forEach((user) => {
+                let user_current = this.users.find(user_search=>user.id===user_search.id)
+                if(user_current){
+                    user_current['status_user'] = status
+                }
+            });
         }
     },
     mounted(){
-        //ouve quando a mensagem for enviado
+        this.getContacts()
+        this.setComponent('listContact')
+        //ouve quando a mensagem for recebida
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.setMessage([e.message]);
-                this.classMessage.updateMessageView([e.message])
+                this.classMessage.setMessage(e);
             })
-
-        //ouve quando a mensagem for visualuzada
-        Echo.private(`message.viewed.user.${this.user.id}`)
-        .listen('MessageViewed', (e) => { 
-
-            this.classMessage.messages.forEach((element,index) => {
-                if(e.messages_id.indexOf(element.id) !== -1){
-                    this.classMessage.updateMessageStatusTemple(Message.status_viewed,index)
-                }
-            });
-        });
 
         Echo.join('user.status.transmition')
         .here((users) => {
-
-            let user_online = users.find(
-                    search =>search.id == this.user_received.id
-                )
-
-            if(!user_online)return;
-
-            this.setStatusUser('online')
+            this.setStatusUsers(users,this.online_user);
         })
         .joining((user) => {
-            // this.statusUser('online')
-            let user_online = user.id == this.user_received.id
-            
-            if(!user_online)return;
-
-            this.setStatusUser('online')
-            
+            this.setStatusUsers([user],this.online_user);
         })
         .leaving((user_leaving) => {
-            this.setStatusUser('offline')
-
+            this.setStatusUsers([user_leaving],this.offline_user)
         })
         .error((error) => {
             console.log('esta error')
 
             console.error(error);
         }) 
-    },
-    beforeMount(){
-        this.classMessage.getmessages(this.user_received)
-        .then(response=>{this.classMessage.callUpdateMessage(response);this.classMessage.setMessage(response)});
     }
+
 }
 </script>
 
 <template>
-    <Head title="conversa" />
-    <Message @new_message="(data)=>classMessage.addMessage(...data)" title="conversar" :user="user" :user_received="user_received" :token="token" :status_user="status_user"/>
-    <div id="content-message">
-        <template v-for="message_data in classMessage.messages"> 
-            <div class="date" v-if="message_data.created_at">
-                {{ message_data.created_at }}
-            </div>
-            <div v-if="user.id==message_data.sender_user_id" class="user_send message-item">
-                {{ message_data.message }}
-            <div class="time-user-current">
-                <span>{{ message_data.time }}</span>
-                <span class="icon-message">
-                    <div :class="message_data.status_class+ ' icon-message-bar icon-message-bar-one'"></div>
-                    <div :class="message_data.status_class+ ' icon-message-bar icon-message-bar-two'"></div>
-                    <div v-if="message_data.status == 2" :class="message_data.status_class+ ' icon-message-bar icon-message-bar-tree'"></div>
-                </span>
-            </div>
-
-            </div>
-            <div v-else class="user_received message-item">
-                {{ message_data.message }}
-                <div class="time">
-                    <span>{{ message_data.time }}</span>
-                </div>
-
-            </div>
-
-        </template>
-    </div>
+    <!-- <componete_active   ></componete_active> -->
+    <component :is="componete_active['name']", v-bind="componete_active" :setComponent="setComponent"></component>
 </template>

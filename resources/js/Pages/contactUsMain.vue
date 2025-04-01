@@ -15,7 +15,7 @@ export default {
             connection_established:false,
             user_connected:undefined,
             connection : undefined,
-            classMessage:new Message(this.user.id,this.user_connected.id),
+            classMessage:new Message(this.user.id),
         }
     },
     methods:{

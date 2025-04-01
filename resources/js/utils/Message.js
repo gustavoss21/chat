@@ -21,22 +21,21 @@ export class Message{
         [this.status_viewed]:'icon-viewed',
     }
 
-    constructor(user_id,user_received_id){
+    constructor(user_id){
         this.messages = [];
         this.user_id = user_id;
-        this.user_received_id = user_received_id;
         this.messageDay = 0
 
     }
-    async getmessages(){
-        let messages = request('api/chat?sender_user_id='+this.user_id+'&recipient_user_id='+this.user_received_id)
+    async getmessages(user_received_id){
+        let messages = request('api/chat?sender_user_id='+this.user_id+'&recipient_user_id='+user_received_id)
         return messages;
     }
 
     setMessage(messages){
-        messages.forEach((element)=>{
-            element = this.setMessageDate(element)
-            this.messages.push(element)
+        messages.forEach((message)=>{
+            let message_with_date = this.setMessageDate(message)
+            this.messages.push(message_with_date)
         })
     }
 
@@ -51,6 +50,7 @@ export class Message{
      */
     setMessageDate(message_data){
         let date = message_data.created_at
+        message_data.status = message_data.status || Message.status_pending
         message_data.created_at = this.dateFormat(date);
         message_data['time'] = this.getTimeMessage(date)
         message_data['status_class'] = Message.status_class[message_data.status]
@@ -73,19 +73,21 @@ export class Message{
 
         let date = new Date(message_date)
         let nowDate =new Date(Date.now());
+
+        if(date.getDate() === this.messageDay)return false;
         
         if(
-                date.getFullYear() === nowDate.getFullYear() && date.getMonth() === nowDate.getMonth()
-        ){
+            date.getFullYear() === nowDate.getFullYear()){
+
+            let diff_month = nowDate.getMonth() - date.getMonth();
+            let ultimoDia = (new Date(date.getFullYear(), date.getMonth()+1, 0)).getDate();
+            let diff_day = (ultimoDia - date.getDate()) + nowDate.getDate()
             
-            if(date.getDate() === this.messageDay)return false;
-
-            if((nowDate.getDate() - date.getDate()) < 7 ){
-                options = {weekday: "long"};
-            }
+            if(!(diff_month <= 1 && diff_day < 7))return;
+            
+            options = {weekday: "long"};
+            
         }
-
-
 
         this.messageDay = date.getDate()
 

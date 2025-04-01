@@ -15,23 +15,23 @@ Route::get('/', function () {
     ]);
 })->middleware('auth');
 
-Route::get('/list-contact', function(Request $request){
-    return Inertia::render('listContact', [
-        'user' => Auth::user(),
-        'token'=>$request->session()->token()
-
-    ]);
-})->middleware('auth');
-
-Route::get("/chat", function(Request $request){
-    $user_received = User::find($request->get('received'));
-    
+Route::get('/chat', function(Request $request){
     return Inertia::render('chat', [
         'user' => Auth::user(),
-        'user_received'=>$user_received,
         'token'=>$request->session()->token()
+
     ]);
 })->middleware('auth');
+
+// Route::get("/chat", function(Request $request){
+//     $user_received = User::find($request->get('received'));
+    
+//     return Inertia::render('chat', [
+//         'user' => Auth::user(),
+//         'user_received'=>$user_received,
+//         'token'=>$request->session()->token()
+//     ]);
+// })->middleware('auth');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

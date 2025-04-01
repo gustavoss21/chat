@@ -5,11 +5,10 @@ import { request } from '../utils/request'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 export default {
-    props:['user','token'],
+    props:['user','users','token','setComponent'],
     data() {
         return{
-            teste:'enos',
-            users:['tese','smari','sfsoefiwe','dsfs'],
+            
             url : "http://127.0.0.1:8000/chat",
             status_user:'offline',
 
@@ -54,61 +53,7 @@ export default {
             navigator.sendBeacon('http://127.0.0.1:8000/api/status-user',myInits);
         },
 
-        getContacts(){
-            let headers = {
-                'accept':'application/json'
-            }
 
-            let user_name = this.user['name'];
-
-            let rest = request('http://127.0.0.1:8000/api/users/?name='+user_name)
-            .then(response=>this.users = response);
-
-            return rest
-        },
-    },
-
-    mounted(){
-        this.getContacts()
-
-        Echo.join('user.status.transmition')
-        .here((users) => {
-            // console.log('esta aqui')
-            // console.log(users);
-            let user_online = this.users.filter(
-                user=>users.find(
-                    search =>search.id == user.id
-                )
-                ?true
-                :false
-            )
-
-            if(!user_online.length)return;
-
-            user_online.forEach(user=>user.status_user = 1)
-        })
-        .joining((user) => {
-            this.statusUser('online')
-            let user_online = this.users.find(user=>user.id == user.id)
-            
-            if(!user_online)return;
-
-            user_online.status_user = 1
-            
-        })
-        .leaving((user) => {
-
-            let user_online = this.users.find(user=>user.id == user.id)
-            
-            if(!user_online)return;
-
-            user_online.status_user = 0
-        })
-        .error((error) => {
-            console.log('esta error')
-
-            console.error(error);
-        }) 
     },
 }
 </script>
@@ -117,7 +62,7 @@ export default {
     <Head title="lista de contatos" />
     <NavBar :user="user" :token="token"></NavBar>
     <h1>chegamos</h1>
-    <a  v-for="user_data in users" :href="url+'?send='+user.id+'&received='+user_data.id"> 
+    <a @click.prevent="(e)=>setComponent('chatMessage',{'user_received':user_data})"  v-for="user_data in users" :href="url+'?send='+user.id+'&received='+user_data.id"> 
         <div class="contact">
             {{ user_data.name }} <b>{{ user_data.status_user }}</b>
         </div>

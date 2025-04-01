@@ -4,7 +4,7 @@ import { request } from '../utils/request'
 </script>
 <script>
 export default { 
-    props:['user','user_received','token','title','status_user'],
+    props:['user','user_received','token','title'],
     data(){
         return {
             message:'',
@@ -32,8 +32,8 @@ export default {
         <h1>{{ title }}</h1>
         <div id="user_received">
             <h2>{{ user_received.name }}</h2>
-            <span class="icon-status" :id="'icon-status-'+status[status_user]"></span>
-            <span id="status">{{ status[status_user] }}</span>
+            <span class="icon-status" :id="'icon-status-'+status[user_received.status_user]"></span>
+            <span id="status">{{ status[user_received.status_user] }}</span>
         </div>
 
         <form @submit.prevent="emitForm" action="/" method="post">

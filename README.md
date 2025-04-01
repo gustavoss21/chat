@@ -48,5 +48,4 @@ usuario da chamada2
 sobre a tabela
 php artisan db:table users
 
-git commit 
-- ajustes  no recebimento do evento de status do usuário
+## git commit 

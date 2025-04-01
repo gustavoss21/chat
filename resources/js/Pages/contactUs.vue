@@ -15,7 +15,8 @@ export default {
             messages:[],
             connection_established:false,
             user_received : null,
-            classMessage : new Message(this.user.id,this.user_connected.id)
+            user_connected : {},
+            classMessage : new Message(this.user.id)
 
         }
     },
@@ -88,7 +89,7 @@ export default {
                     {{ message_data.message }}
                 </div>
             </div>
-            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_received="user_received" :token="token"/>
+            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_received="user_connected" :token="token"/>
         </div>
     </template>
 </template>
