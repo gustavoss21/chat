@@ -1,0 +1,84 @@
+h1{
+    background-color: rgb(42, 207, 196);
+    padding: 5px;
+    text-align: center;
+    color: white;
+    min-width: 100vw;
+}
+
+.content-button{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 200px;
+    align-items: center;
+    border-radius: 10px;
+    margin: auto;
+    margin-top: 40px;
+    background-color: #8bc6c02e;
+    width: 300px;
+}
+
+.button{
+    background-color: rgb(42, 207, 196);
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 5px;
+    position: relative;
+}
+
+.button-init-call:hover{
+    background-color: rgb(88, 247, 236);
+}
+
+.button-closed-call{
+    background-color: #F44336;
+    color: white;
+}
+.button-closed-call:hover{
+    background-color: rgb(251, 99, 99);
+}
+
+#number-user{
+    display: inline-bloFck;
+    padding: 0px 6px;
+    background-color: red;
+    position: absolute;
+    border-radius: 15px;
+    bottom: 23px;
+    left: 110px;
+    color: white;
+    font-size: 0.7em;
+}
+
+.btn-deactive{
+    background-color:#d2dcdc;
+    color:#555353;
+    cursor: auto;
+
+}
+
+.icon-status{
+    display: inline-block;
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+
+#user-active{
+    position: fixed;
+    margin: 0;
+    height: 41px;
+    right: 10px;
+    top: 40px;
+    z-index: 6;
+    background-color: white;
+    flex-direction: column;
+    width: auto;
+}
+
+/* responsive */
+
+

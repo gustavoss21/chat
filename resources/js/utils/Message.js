@@ -25,7 +25,8 @@ export class Message{
         this.messages = [];
         this.user_id = user_id;
         this.messageDay = 0
-
+        this.messages_to_add = []
+        this.send_message_status = false
     }
     async getmessages(user_received_id){
         let messages = request('api/chat?sender_user_id='+this.user_id+'&recipient_user_id='+user_received_id)
@@ -39,9 +40,11 @@ export class Message{
         })
     }
 
-    updateMessage(message,index){
+    updateMessage(message,index_arg){
+        if(!this.messages[index_arg])return;
+
         message = this.setMessageDate(message)
-        this.messages.splice(index,1,message);
+        this.messages.splice(index_arg,1,message);
     }
     /**
      * nao mexe no this
@@ -74,7 +77,7 @@ export class Message{
         let date = new Date(message_date)
         let nowDate =new Date(Date.now());
 
-        if(date.getDate() === this.messageDay)return false;
+        if(date.getDate() === this.messageDay)return
         
         if(
             date.getFullYear() === nowDate.getFullYear()){
@@ -83,7 +86,7 @@ export class Message{
             let ultimoDia = (new Date(date.getFullYear(), date.getMonth()+1, 0)).getDate();
             let diff_day = (ultimoDia - date.getDate()) + nowDate.getDate()
             
-            if(!(diff_month <= 1 && diff_day < 7))return;
+            if(!(diff_month <= 1 && diff_day < 7))return
             
             options = {weekday: "long"};
             
@@ -119,8 +122,9 @@ export class Message{
 
     addMessage(form,msg){
         console.log('message method was invoked')
+        if(!msg)return
+
         let message = {
-            id:0,
             sender_user_id:this.user_id,
             message:msg,
             status:this.status_pending,
@@ -131,13 +135,28 @@ export class Message{
         this.setMessage([message])
 
         // this.messages.push(message);
+        if(this.send_message_status){
+            let form_data = form.target.cloneNode(true)
+            this.messages_to_add.push(form_data)
+            return
+        }
 
-        this.sendMessage(form)
+        this.sendMessage(form,this.messages.length - 1)
 
         msg = '';
+        this.send_message_status = true
+
     }
 
-    sendMessage(form){
+    resendMessage(index){
+        this.send_message_status = false;
+
+        if(!(this.messages_to_add.length >= 1))return
+
+        this.sendMessage(this.messages_to_add.shift(),index)
+    }
+
+    sendMessage(form,index){
         let headers = {
             'accept':'application/json',
             // 'content-type':'application/json'
@@ -145,15 +164,25 @@ export class Message{
         }
         let url_base = "http://127.0.0.1:8000/api/chat";
         let url = url_base+'?sender_user_id='+this.user_id+'&recipient_user_id='+this.user_received_id
-        let formData = new FormData(form.target);
+        let formData = new FormData(form.target||form
+            
+        );
+        
 
-        request(url,'POST',formData,headers)
+        return request(url,'POST',formData,headers)
             .then((msg)=>{
-                let index = this.messages.length -1
                 this.updateMessage(msg,index)
-                this.updateMessageStatusTemple(Message.status_success)
+                this.updateMessageStatusTemple(Message.status_success,index)
+                this.resendMessage(index+1)
+
             }
-            ).catch((error)=>this.updateMessageStatusTemple(Message.status_error,null,true))
+            ).catch((error)=>{
+                this.updateMessageStatusTemple(Message.status_error,index);
+                console.log(error);
+                
+                if(this.messages_to_add.length >= 1){
+                    this.resendMessage()
+                }})
     }
 
     /**
@@ -161,12 +190,12 @@ export class Message{
      * @param Number status
      * @param Number ?index
      */
-     updateMessageStatusTemple(status=null, index=null){
-        let index_current = index || this.messages.length - 1;
+     updateMessageStatusTemple(status, index){
+        if(!this.messages[index])return;
 
         if(Message.status_list.indexOf(status) === -1) throw new TypeError('status error');
         
-        this.messages[index_current].status = status; 
-        this.messages[index_current]['status_class'] = Message.status_class[status]
+        this.messages[index].status = status; 
+        this.messages[index]['status_class'] = Message.status_class[status]
      }
 }

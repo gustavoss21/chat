@@ -5,6 +5,7 @@ import { request } from '../utils/request'
 import { Message } from '../utils/Message'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { stringify } from 'postcss';
+import '../../css/contact.css';
 
 export default {
     props:['user','token'],
@@ -16,34 +17,40 @@ export default {
             connection_established:false,
             user_received : null,
             user_connected : {},
-            classMessage : new Message(this.user.id)
-
+            classMessage : new Message(this.user.id),
         }
     },
     methods:{
         activeCall(user){
             if(user.id === this.user.id)return;
-            
+
             this.connection_established = true;
             this.user_connected = user;
+            this.user_connected.status_user = 1
             this.classMessage.user_received_id = user.id;
+            this.status = 'Estamos conectado'
         },
         deactiveCall(){
             this.connection_established = false;
             this.user_connected = undefined;
             this.classMessage.user_received_id = undefined;
-
+            this.status = "Chamada encerrada!\nVolte sempre que precisar"
         },
 
         dropCall(user){
-            Echo.leave(`contact.us.${user.id}`);
+
+            Echo.leave(`contact.us.${this.user.id}`);
+            Echo.leave('user.access.contact.us')
             this.deactiveCall()
         }
         
     },
 
     mounted(){
-        // this.connetContactMain();
+        //evita que o dialogo encerre sem a inteção
+        window.addEventListener("beforeunload", function (event) {
+           event.preventDefault();
+        });
 
         Echo.join(`contact.us.${this.user.id}`)
         .here((users) => {
@@ -63,33 +70,36 @@ export default {
             console.error(error);
         }) 
 
+        // alerta quando o usuário esta disponivel para contato
         Echo.join('user.access.contact.us')
 
-        //defined message
+        //ouve quando a mensagem for recebida
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.messages.push(e.message);
-                // this.message.updateMessageView([e.message])
-            });
+                this.classMessage.setMessage([e.message]);
+                this.classMessage.updateMessageView([e.message])
+            })
     },
+    computed:{
+        button_sair(){
+            return  this.connection_established?'button button-closed-call':'button btn-deactive'
+    },
+        connected_style_id(){
+            return this.connection_established?'user-active':'';
+        }
+}
 }
 </script>
 
 <template>
     <Head title="contate nos" />
-    <h2>{{ status }}</h2>
     <template v-if="connection_established">
-        <div id="chat">
-            <div v-for="message_data in classMessage.messages"> 
-
-                <div v-if="user.id==message_data.sender_user_id" class="user_send">
-                    {{ message_data.message }}   ->  {{ message_data.status }}
-                </div>
-                <div v-else class="user_received">
-                    {{ message_data.message }}
-                </div>
-            </div>
-            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_received="user_connected" :token="token"/>
+        <div class="content-button" :id="connected_style_id">
+            <button :class="button_sair" type="button" @click="dropCall(user_connected)">sair do chat</button>
         </div>
+        <chatMessage :user="user" :user_received="user_connected" new_message="" :token="token" :classMessage="classMessage" has_messages="true"></chatMessage>
     </template>
+    <h1 v-else>
+        {{ status }}
+    </h1>
 </template>

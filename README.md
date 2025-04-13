@@ -16,12 +16,11 @@
 <!-- * composer run dev -->
 
 ## proximos passos 
+- pagar migraçao UserContactChat
 - carregameto dinamico da pagina
 - adiconar validador de message no messageControler
-- api auth request message
 - verificar e padronizar retornos de metodos de controller
 - envio de midia(videos, musicas, doc,imagens)
-- UserContactChat os usuarios devem ser unicos
 - metodo para apagar as mensagens de chat main
 - adicionar o campo typo em mensagem
 

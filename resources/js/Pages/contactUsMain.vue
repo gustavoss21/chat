@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { request } from '../utils/request';
 import {Message} from '../utils/Message'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-
+import '../../css/contact.css';
 
 export default {
     props:['user','token'],
@@ -16,6 +16,7 @@ export default {
             user_connected:undefined,
             connection : undefined,
             classMessage:new Message(this.user.id),
+            user_to_close:{}
         }
     },
     methods:{
@@ -47,27 +48,30 @@ export default {
                 
         },
         dropCall(user){
-            this.users_for_call.forEach((user_value,index) => {
-                if(user_value.id === user.id){
-                    if(this.user_connected.id === user_value.id){
-                        this.connection_established = false;
-                    }
+       
+            if(this.user_connected && this.user_connected.id === user.id){
+                this.connection_established = false;
+                this.classMessage = new Message(this.user.id),
+                Echo.leave(`contact.us.${this.user_connected.id}`);
 
-                    this.users_for_call.splice(index,1)
-                }
-            });
-
-            Echo.leave(`contact.us.${user.id}`);
-            this.classMessage.user_received_id = undefined;
-
+            }                
         },
         callUser(){
-            let user_for_Call = this.users_for_call[0]
+            let user_for_Call = this.users_for_call.shift()
             this.user_connected = user_for_Call;
             this.connection_established = true;
 
-            Echo.join(`contact.us.${this.user_connected.id}`);
+            Echo.join(`contact.us.${this.user_connected.id}`)
+            .leaving((user) => {
+                this.dropCall(user)
+            })
+            .error((error) => {
+                console.log('esta error')
+
+                console.error(error);
+            }) ;
             this.classMessage.user_received_id = this.user_connected.id
+            this.user_connected.status_user = 1
 
         },
         addNewUser(user){
@@ -79,7 +83,10 @@ export default {
 
             this.users_for_call.push(user)
         },
-        nextCall(){},
+        nextCall(){
+            this.dropCall(this.user_connected)
+            this.callUser()
+        },
         /** check the connection, call the user if there is no connection */
         establishConnection(){
             
@@ -91,21 +98,27 @@ export default {
     },
 
     mounted(){
-        //defined message
+        //evita que o dialogo encerre sem a inteção
+        window.addEventListener("beforeunload", function (event) {
+           event.preventDefault();
+        });
+    
+        //ouve quando a mensagem for recebida
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.messages.push(e.message);
-            });
+                this.classMessage.setMessage([e.message]);
+                this.classMessage.updateMessageView([e.message])
 
+            })
 
+        // alerta quando algum usuário entrou em contato
         Echo.join('user.access.contact.us')
         .here((users) => {
             this.addNewUser(users)
         })
         .joining((user) => {
             this.addNewUser(user)
-        })
-        
+        })   
         .leaving((user) => {
             this.dropCall(user)
         })
@@ -114,7 +127,25 @@ export default {
 
             console.error(error);
         }) 
-    }
+    },
+
+    computed:{
+        button_entrar(){
+            if(this.users_for_call.length<1)return 'button btn-deactive'
+            
+            return 'button button-init-call'
+        },
+
+        button_sair(){
+            return  this.users_for_call.length>=1 && this.connection_established?'button button-closed-call':'button btn-deactive'
+    },
+        userCount(){
+            return  this.users_for_call.length>=1?true:false
+    },
+        connected_style_id(){
+            return this.connection_established?'user-active':'';
+        },
+}
 
     
 }
@@ -122,25 +153,25 @@ export default {
 
 <template>
     <Head title="contate nos" />
-    <h2>Painel de controle</h2>
-    <div>
-        <button @click="establishConnection" type="button">entrar no chat{{ users_for_call.length }}</button>
+    <h1>Painel de controle</h1>
+    <div class="content-button" :id="connected_style_id">
+        <button v-if="!connection_established" :class="button_entrar" @click="establishConnection" type="button">
+            entrar no chat
+            <span v-if="userCount" id="number-user">
+                {{ users_for_call.length }}
+            </span>
+        </button>
+        <button v-else="connection_established" :class="button_entrar" @click="nextCall" type="button">
+            proxima call >
+            <span v-if="userCount" id="number-user">
+                {{ users_for_call.length }}
+            </span>
+        </button>
         <br>
-        <button type="button" @click="dropCall">sair do chat</button>
+        <button :class="button_sair" type="button" @click="dropCall(user_connected)">sair do chat</button>
     </div>
-        <div id="chat">
-            <div v-for="message_data in classMessage.messages"> 
-
-                <div v-if="user.id==message_data.sender_user_id" class="user_send">
-                    {{ message_data.message }}   ->  {{ message_data.status }}
-                </div>
-                <div v-else class="user_received">
-                    {{ message_data.message }}
-                </div>
-            </div>
-        </div>
         <template v-if="connection_established">
-            <Message @new_message="(event)=>classMessage.addMessage(...event)" :user="user" :user_received="user_connected" :token="token"/>
+            <chatMessage :user="user" :user_received="user_connected" new_message="" :token="token" :classMessage="classMessage" has_messages="true"></chatMessage>        
         </template>
 
 </template>
