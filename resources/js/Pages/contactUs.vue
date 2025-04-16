@@ -76,7 +76,7 @@ export default {
         //ouve quando a mensagem for recebida
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.setMessage([e.message]);
+                this.classMessage.setMessages([e.message]);
                 this.classMessage.updateMessageView([e.message])
             })
     },

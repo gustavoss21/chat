@@ -77,7 +77,7 @@ export default {
     beforeMount(){
         if(!this.has_messages){
             this.classMessage.getmessages(this.user_received.id)
-            .then(response=>{this.classMessage.callUpdateMessage(response);this.classMessage.setMessage(response)});
+            .then(response=>{this.classMessage.callUpdateMessage(response);this.classMessage.setMessages(response)});
         }
     }
 }

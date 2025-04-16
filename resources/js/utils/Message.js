@@ -33,17 +33,19 @@ export class Message{
         return messages;
     }
 
-    setMessage(messages){
+    setMessages(messages){
         messages.forEach((message)=>{
-            let message_with_date = this.setMessageDate(message)
+            let message_with_date = this.fomateMessageData(message)
             this.messages.push(message_with_date)
         })
+
+        return this.messages
     }
 
     updateMessage(message,index_arg){
         if(!this.messages[index_arg])return;
 
-        message = this.setMessageDate(message)
+        message = this.fomateMessageData(message)
         this.messages.splice(index_arg,1,message);
     }
     /**
@@ -51,7 +53,9 @@ export class Message{
      * @param {Object} message_data 
      * @return message_data
      */
-    setMessageDate(message_data){
+    fomateMessageData(message_data){
+        if(!message_data)return;
+        
         let date = message_data.created_at
         message_data.status = message_data.status || Message.status_pending
         message_data.created_at = this.dateFormat(date);
@@ -132,7 +136,7 @@ export class Message{
 
         }
         
-        this.setMessage([message])
+        this.setMessages([message])
 
         // this.messages.push(message);
         if(this.send_message_status){

@@ -14,13 +14,14 @@ export default {
             offline_user : 0,
             componets:
                 {
-                    'listContact':{'name':'listContact','user':this.user,'token':this.token},
+                    'listContact':{'name':'listContact','user':this.user,'users':[],'token':this.token, 'last_messages':[]},
                     'chatMessage':{'name':'chatMessage','user':this.user,'token':this.token,'user_received':null,'new_message':null},
                     'contactUs':{'name':'contactUs','user':this.user,'token':this.token},
                     'ContactUsMain':{'name':'ContactUsMain','user':this.user,'token':this.token}
                 },
             componete_active:{},
             classMessage: new Message(this.user.id),
+            last_messages: []
 
         }
     },
@@ -29,22 +30,35 @@ export default {
             if(!Object.hasOwn(this.componets,component))return;
         
             this.componete_active = this.componets[component]
-            this.componete_active['classMessage'] = this.classMessage
+            this.componete_active['classMessage'] = new Message(this.user.id)
 
             if(data){
-                Object.keys(data).forEach(key=>{
-                    if(Object.hasOwn(this.componete_active,key)){
-                        this.componete_active[key] = data[key];
-                    }
-                })
+                this.setComponentData(component, data)
             }
 
+        },
+        setComponentData(component,data){
+
+            Object.keys(data).forEach(key=>{
+                    if(Object.hasOwn(this.componets[component],key)){
+                        if(this.componets[component]['name'] === this.componete_active['name']){
+                            this.componete_active[key] = data[key];
+                        }
+                        this.componets[component][key] = data[key];
+
+                    }
+                })
+        },
+
+        setContactsDatas(datas){
+            this.users = datas[0]
+            this.setComponentData('listContact',{'users': this.users,'last_messages': this.classMessage.setMessages(datas[1])})
         },
         getContacts(){
             let user_name = this.user['name'];
 
-            let users = request('http://127.0.0.1:8000/api/users/?name='+user_name)
-            .then(response=>{this.users = response,this.componete_active['users']= response});
+            request('http://127.0.0.1:8000/api/users/?name='+user_name)
+            .then(response=>this.setContactsDatas(response))
         },
         setStatusUsers(users,status){
             users.forEach((user) => {
@@ -56,12 +70,11 @@ export default {
         }
     },
     mounted(){
-        this.getContacts()
         this.setComponent('listContact')
         //ouve quando a mensagem for recebida
         Echo.private(`chat.${this.user.id}`)
             .listen('SendMessage', (e) => {
-                this.classMessage.setMessage(e);
+                this.classMessage.setMessages(e);
             })
 
         Echo.join('user.status.transmition')
@@ -79,12 +92,14 @@ export default {
 
             console.error(error);
         }) 
+    },
+    beforeMount(){
+        this.getContacts()
     }
 
 }
 </script>
 
 <template>
-    <!-- <componete_active   ></componete_active> -->
     <component :is="componete_active['name']", v-bind="componete_active" :setComponent="setComponent"></component>
 </template>

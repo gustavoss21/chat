@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
+use App\Models\Message;
+
+use function PHPSTORM_META\map;
 
 class ProfileController extends Controller
 {
@@ -66,9 +69,26 @@ class ProfileController extends Controller
         // $username = $request->user()->name;
         $username = $request->input('name');
 
-        $user = User::where('name','<>',$username)->get();
+        $users = User::where('name','<>',$username)->get();
+        // $message = Message::where('name','<>',$username)->get();
+        $message = Message::where(
+            'sender_user_id',$request->user()->id
+        );
 
-        return response($user);
+        $user_with_last_message = $users->map(function ($item, int $key) use($request, $message) {
+            $message = clone $message;
+
+            $last_message = $message->where(
+                'sender_user_id',$request->user()->id
+                )->where(
+                    'recipient_user_id',$item['id']
+                )->latest()
+                ->first();
+
+            return $last_message;
+        });
+
+        return response([$users,$user_with_last_message]);
 
     }
 

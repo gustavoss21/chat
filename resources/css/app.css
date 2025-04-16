@@ -8,21 +8,6 @@ a{
     color: black;
 }
 
-.contact{
-    padding: 5px;
-    border: 1px solid rgb(144, 144, 144);
-    border-radius: 5px;
-    margin-bottom: 5px;
-    background-color: rgb(75, 75, 161);
-    color:white
-}
-
-.contact:hover{
-    background-color: rgb(30, 30, 63);
-    
-}
-
-
 .navbar{
     list-style-type: none;
 }
